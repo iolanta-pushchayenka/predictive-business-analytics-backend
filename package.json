@@ -1,0 +1,29 @@
+{
+  "name": "predictive-business-analytics-backend",
+  "version": "1.0.0",
+  "type":"module",
+  "description": "Backend for a predictive business analytics web platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iolanta-pushchayenka/predictive-business-analytics-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iolanta-pushchayenka/predictive-business-analytics-backend/issues"
+  },
+  "homepage": "https://github.com/iolanta-pushchayenka/predictive-business-analytics-backend#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
