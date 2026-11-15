@@ -2,7 +2,6 @@
 'use strict';
 
 // Synthetic test data for the development database.
-// Do not run against production.
 
 const records = {
   users: [
@@ -98,16 +97,14 @@ const records = {
       analysis_id: 'a79ae3de-5257-5c24-9c6d-c8c5d7149b36',
       total_revenue: '12500.50',
       total_orders: 100,
-      total_customers: 64,
-      average_order_value: '125.01'
+      total_customers: 64
     },
     {
       id: '3255f84b-b777-5b19-bbcc-a74ed896e394',
       analysis_id: '6fdd2940-798e-512e-8ddf-1e1d543dc3e0',
       total_revenue: '490.00',
       total_orders: 7,
-      total_customers: null,
-      average_order_value: '70.00'
+      total_customers: null
     }
   ],
 
