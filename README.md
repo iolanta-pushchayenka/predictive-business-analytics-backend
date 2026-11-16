@@ -107,11 +107,15 @@ The database schema can also be inspected in the exported SQL file:
 
 ### Development Test Data
 
-Synthetic test data is provided through a Sequelize seeder located in:
-
-`seeders/`
+Synthetic test data is provided through a Sequelize seeder located in the `seeders/` directory.
 
 The seeder includes test records for all 13 application tables and covers different scenarios, including missing customer information, zero usable rows, and multiple users.
+
+After applying the database migrations, run the following command to populate the database with test data:
+
+```bash
+npx sequelize-cli db:seed:all --config config/common.cjs --env development
+```
 
 The seeder uses transactions to maintain data consistency during insertion and deletion.
 
