@@ -5,6 +5,11 @@ import cors from "cors";
 
 export const app = express();
 
+// Trust the reverse proxy when running on Render.
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Allow requests from the React frontend
 app.use(cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173"
