@@ -10,10 +10,16 @@ if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
 }
 
-// Allow requests from the React frontend
+// Allow requests from the deployed and local React frontend.
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173"
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173"
+    origin: allowedOrigins
 }));
+
 
 app.use(express.json());
 
