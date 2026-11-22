@@ -4,6 +4,7 @@ import authRouter from "./routes/auth.routes.js";
 import cors from "cors";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
+import { setupSwagger } from "./docs/swagger.js";
 
 export const app = express();
 
@@ -27,6 +28,9 @@ app.use(
 app.use(express.json());
 
 app.use(requestLogger);
+
+// Register interactive API documentation.
+setupSwagger(app);
 
 app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);

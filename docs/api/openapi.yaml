@@ -1,0 +1,397 @@
+# OpenAPI specification version
+openapi: 3.1.0
+
+# General API information
+info:
+  title: Predictive Business Analytics API
+  version: 1.0.0
+  description: >
+    REST API for the Predictive Business Analytics web platform.
+    The current implementation provides user registration,
+    authentication, profile retrieval, and a health check.
+
+# Available API servers
+servers:
+  - url: https://predictive-business-analytics-backend.onrender.com
+    description: Production server (Render)
+
+  - url: http://localhost:3000
+    description: Local development server
+
+# Endpoint categories
+tags:
+  - name: Health
+    description: API availability checks
+
+  - name: Authentication
+    description: User registration, login, and authentication
+
+# API endpoints
+paths:
+  /api/health:
+    get:
+      tags:
+        - Health
+      security: []
+      summary: Check API availability
+      description: >
+        Returns the current HTTP application status.
+        This endpoint does not check database connectivity.
+      operationId: getHealth
+      responses:
+        "200":
+          description: API is responding successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: ok
+
+        "400":
+          description: >
+            Malformed JSON request body rejected by the global
+            JSON parser before reaching the health endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "413":
+          description: JSON request body exceeds the configured size limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: request entity too large
+
+        "415":
+          description: Unsupported JSON encoding or charset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: >
+        Creates a new user account, securely hashes the password
+        using Argon2id, and returns the user profile and a JWT.
+        This endpoint does not require authentication.
+        Requests are subject to rate limiting.
+      operationId: registerUser
+      security: []
+
+      requestBody:
+        required: true
+        description: User registration credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialsRequest"
+            example:
+              email: user@example.com
+              password: ExamplePass123!
+
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+              example:
+                user:
+                  id: 00000000-0000-4000-8000-000000000001
+                  email: user@example.com
+                token: "<JWT>"
+
+        "400":
+          description: Invalid registration data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Invalid registration data
+
+        "409":
+          description: Email is already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Email is already registered
+
+        "429":
+          description: >
+            Authentication rate limit exceeded.
+            Registration and login share a limit of
+            20 requests per IP within 15 minutes.
+          headers:
+            Retry-After:
+              description: Seconds until the rate limit resets
+              schema:
+                type: integer
+                minimum: 0
+            RateLimit:
+              description: Current rate limit information
+              schema:
+                type: string
+            RateLimit-Policy:
+              description: Applied rate limiting policy
+              schema:
+                type: string
+          content:
+            text/html:
+              schema:
+                type: string
+              example: Too many requests, please try again later.
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Internal server error
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Log in an existing user
+      description: >
+        Authenticates a user with their email and password.
+        If the credentials are valid, returns the user profile
+        and a JWT access token. This endpoint is public
+        and subject to rate limiting.
+      operationId: loginUser
+      security: []
+
+      requestBody:
+        required: true
+        description: User login credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialsRequest"
+            example:
+              email: user@example.com
+              password: ExamplePass123!
+
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+              example:
+                user:
+                  id: "00000000-0000-4000-8000-000000000001"
+                  email: user@example.com
+                token: "<JWT>"
+
+        "400":
+          description: Invalid login data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Invalid login data
+
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Invalid email or password
+
+        "429":
+          description: Too many requests
+          content:
+            text/html:
+              schema:
+                type: string
+              example: Too many requests, please try again later.
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Internal server error
+
+  /api/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      description: >
+        Returns the profile of the currently authenticated user.
+        Requires a valid JWT access token in the Authorization header.
+        The user is identified by the sub claim in the token.
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+
+      responses:
+        "200":
+          description: Current user profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUser"
+              example:
+                id: "00000000-0000-4000-8000-000000000001"
+                email: user@example.com
+
+        "401":
+          description: >
+            Authentication token is missing, invalid, expired,
+            or the associated user no longer exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingToken:
+                  summary: Missing authentication token
+                  value:
+                    error: Authentication token is required
+                invalidToken:
+                  summary: Invalid authentication token
+                  value:
+                    error: Invalid authentication token
+                expiredToken:
+                  summary: Invalid or expired authentication token
+                  value:
+                    error: Invalid or expired authentication token
+                userNotFound:
+                  summary: User no longer exists
+                  value:
+                    error: User no longer exists
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Internal server error
+
+# Reusable data models
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      description: Health check response
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          const: ok
+          description: Current HTTP application status
+          examples:
+            - ok
+
+    CredentialsRequest:
+      type: object
+      description: Credentials required for registration and login
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: >
+            User email address. Valid emails are converted to
+            lowercase. Surrounding whitespace is not accepted.
+          examples:
+            - user@example.com
+
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+          writeOnly: true
+          description: User password, between 8 and 128 characters
+          examples:
+            - ExamplePass123!
+
+    PublicUser:
+      type: object
+      description: Public user information without password data
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          examples:
+            - 00000000-0000-4000-8000-000000000001
+
+        email:
+          type: string
+          format: email
+          description: Registered user email address
+          examples:
+            - user@example.com
+
+    AuthResponse:
+      type: object
+      description: Successful authentication response
+      required:
+        - user
+        - token
+      properties:
+        user:
+          $ref: "#/components/schemas/PublicUser"
+
+        token:
+          type: string
+          description: JWT access token used for authenticated requests
+          examples:
+            - "<JWT>"
+
+    ErrorResponse:
+      type: object
+      description: Standard JSON error response
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message returned by the API
+          examples:
+            - Invalid registration data
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        JWT access token returned after successful registration
+        or login. Include the token in the Authorization header
+        using the Bearer authentication scheme.
+        Tokens are signed using HS256 and expire after the
+        configured lifetime (2 hours by default).

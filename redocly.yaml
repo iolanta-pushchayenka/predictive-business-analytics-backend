@@ -1,0 +1,9 @@
+extends:
+  - recommended
+
+rules:
+  # No public license has been selected for this academic project.
+  info-license: off
+
+  # Keep localhost available alongside the deployed Render API.
+  no-server-example.com: off
