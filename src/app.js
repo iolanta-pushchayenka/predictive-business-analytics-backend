@@ -5,6 +5,7 @@ import cors from "cors";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
 import { setupSwagger } from "./docs/swagger.js";
+import analysisRouter from "./routes/analysis.routes.js";
 
 export const app = express();
 
@@ -26,6 +27,9 @@ app.use(
   }),
 );
 
+// Allow larger JSON payloads only for analysis endpoints.
+app.use("/api/analyses", express.json({ limit: "10mb" }));
+
 app.use(express.json());
 
 app.use(requestLogger);
@@ -35,6 +39,7 @@ setupSwagger(app);
 
 app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/analyses", analysisRouter);
 
 // Handle unknown routes.
 app.use(notFound);

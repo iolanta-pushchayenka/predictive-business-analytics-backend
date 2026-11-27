@@ -24,10 +24,15 @@ export function errorHandler(err, req, res, next) {
     errorType: err.name || "Error",
   });
 
+  // Return safe and consistent error messages to the client.
   const message =
     safeStatus >= 500
       ? "Internal server error"
-      : err.message || "Request failed";
+      : safeStatus === 413
+        ? "Request payload is too large"
+        : err.type === "entity.parse.failed"
+          ? "Invalid JSON request body"
+          : err.message || "Request failed";
 
   return res.status(safeStatus).json({
     error: message,
