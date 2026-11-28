@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/iolanta-pushchayenka/predictive-business-analytics-backend#readme",
   "dependencies": {
-    "analytics-core": "github:iolanta-pushchayenka/analytics-core#ab68c2ca0fcac39e377398cb30935e12fbe25533",
+    "analytics-core": "github:iolanta-pushchayenka/analytics-core#d733fe1",
     "argon2": "^0.45.2",
     "cors": "^2.8.6",
     "dotenv": "^18.0.10",
